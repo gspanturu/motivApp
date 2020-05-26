@@ -20,30 +20,37 @@ public class MainActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        listView =  (ListView) findViewById(R.id.list_view);
+        listView =  findViewById(R.id.list_view);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0){
+                /*if (position == 0){
                     displaySpeechScreen();
                 }
-                else{
+                else{*/
                     Goal goal = (Goal) parent.getItemAtPosition(position);
                     Intent intent = new Intent(getApplicationContext(), MarkActivity.class);
                     intent.putExtra("id", goal.getId());
                     startActivity(intent);
                 }
-            }
+
         });
         updateUI();
 }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        updateUI();
+    }
+
     private void updateUI() {
         ArrayList<Goal> goals = Helper.getAllGoals(this);
 
-        goals.add(0, new Goal("0", "drink water"));
+       /* goals.add(0, new Goal("0", "drink water"));
         goals.add(1, new Goal("1", "eat food"));
-
+*/
+       goals.add(0, new Goal("", ""));
         listView.setAdapter(new ListViewAdapter(this, 0, goals));
 
     }

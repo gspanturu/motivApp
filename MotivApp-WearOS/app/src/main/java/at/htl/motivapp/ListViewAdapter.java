@@ -8,20 +8,19 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.util.List;
 
 public class ListViewAdapter extends ArrayAdapter<Goal> {
 
 
-    public ListViewAdapter(@NonNull Context context, int resource, @NonNull List<Goal> objects) {
+    public ListViewAdapter( Context context, int resource, List<Goal> objects) {
         super(context, resource, objects);
     }
 
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         if (position == 0){
             return LayoutInflater.from(this.getContext()).inflate(R.layout.new_goal, parent, false);
         }

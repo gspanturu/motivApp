@@ -3,7 +3,7 @@ package at.htl.motivapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import androidx.wear.activity.ConfirmationActivity;
 
@@ -18,7 +18,7 @@ public class Helper {
         String id = String.valueOf(System.currentTimeMillis());
         editor.putString(id, goal.getTitle());
 
-        editor.commit();
+        editor.apply();
 
         return id;
     }
@@ -44,7 +44,7 @@ public class Helper {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(id);
-        editor.commit();
+        editor.apply();
     }
 
     public static void displayConfirmation(String message, Context context){
