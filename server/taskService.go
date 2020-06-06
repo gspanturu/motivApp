@@ -73,6 +73,28 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`Succesfull Insert`))
 }
 
+func postTasks(w http.ResponseWriter, r *http.Request) {
+	var tasks []models.Task
+	defer r.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.Unmarshal(bodyBytes, &tasks)
+
+	fmt.Println(tasks)
+	for _,t := range tasks {
+		InsertTask(t)	
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(`Succesfull Insert`))
+}
+
 func putTask(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 

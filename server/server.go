@@ -19,6 +19,7 @@ func startServer() {
 	api.HandleFunc("/tasks", getTasks).Methods(http.MethodGet)
 	api.HandleFunc("/tasks/{id}", getAllTasksFromIntention).Methods(http.MethodGet)
 	api.HandleFunc("/tasks/add", postTask).Methods(http.MethodPost)
+	api.HandleFunc("/tasks/addMultiple", postTasks).Methods(http.MethodPost)
 	api.HandleFunc("/tasks/update", putTask).Methods(http.MethodPut)
 	api.HandleFunc("/tasks/delete", deleteTask).Methods(http.MethodDelete)
 
