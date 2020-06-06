@@ -1,14 +1,13 @@
 package models
 
-var schema = `
-CREATE TABLE intentions (
-    id SERIAL PRIMARY KEY,
-	description text,
-	done boolean
-)`
+import "strconv"
 
-type Intentions struct {
+type Intention struct {
 	Id          int `db:"id"`
 	Description string
-	Done        bool
+	GoogleId    string
+}
+
+func IntentionsToJson(i Intention) string {
+	return `{ "id": ` + strconv.Itoa(i.Id) + `, "description": "` + i.Description + `", "googleId": "` + i.GoogleId + `" }`
 }

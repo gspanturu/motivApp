@@ -6,17 +6,45 @@ import (
 	"io/ioutil"
 	"motivapp/go/server/models"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
-var intentions models.Intentions
+var intentions models.Intention
 
-func get(w http.ResponseWriter, r *http.Request) {
+func getIntentions(w http.ResponseWriter, r *http.Request) {
+	var intentions = SelectIntentions()
+	var intentionsString = "["
+
+	for _, i := range intentions {
+		intentionsString += models.IntentionsToJson(i)
+		intentionsString += ", \n"
+	}
+
+	intentionsString += "]"
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "get called"}`))
+	w.Write([]byte(intentionsString))
 }
 
-func post(w http.ResponseWriter, r *http.Request) {
+func getIntentionById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var intention = SelectIntentionById(id)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(models.IntentionsToJson(intention)))
+}
+
+func postIntention(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -28,14 +56,14 @@ func post(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(bodyBytes, &intentions)
 
 	fmt.Println(intentions)
-	models.InsertIntention(intentions)
+	InsertIntention(intentions)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "post called"}`))
+	w.Write([]byte(`Succesfull Insert`))
 }
 
-func put(w http.ResponseWriter, r *http.Request) {
+func putIntention(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -47,14 +75,14 @@ func put(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(bodyBytes, &intentions)
 
 	fmt.Println(intentions)
-	models.UpdateIntention(intentions)
+	UpdateIntention(intentions)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(`{"message": "put called"}`))
+	w.Write([]byte(`Succesfull Update`))
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+func deleteIntention(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -67,10 +95,10 @@ func delete(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "delete called"}`))
+	w.Write([]byte(`Succesfull Delete`))
 
 	fmt.Println(intentions)
-	models.DeleteIntention(intentions)
+	DeleteIntention(intentions)
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
