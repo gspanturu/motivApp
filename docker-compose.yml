@@ -1,6 +1,17 @@
 version: '3.5'
 
 services:
+  server:
+    container_name: go_server_container
+    build: ./server  
+    depends_on: 
+      - postgres
+    restart: unless-stopped
+    ports: 
+      - 8080:8080
+    networks:
+      - motivapp
+
   postgres:
     container_name: postgres_container
     image: postgres
