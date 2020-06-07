@@ -14,9 +14,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.*
+import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.GoogleApi
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.fitness.Fitness
+import com.google.android.gms.fitness.data.DataSet
+import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.DataType.AGGREGATE_CALORIES_EXPENDED
 import com.google.android.gms.fitness.data.DataType.TYPE_CALORIES_EXPENDED
 import com.google.android.gms.fitness.request.DataReadRequest
@@ -44,16 +48,6 @@ class MainActivity : WearableActivity() {
     private lateinit var mGoogleSignInClient : GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACTIVITY_RECOGNITION)!= PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,
-                arrayOf(android.Manifest.permission.ACTIVITY_RECOGNITION),
-                REQUEST_CODE_GET_PERMISSION);
-
-        }
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACTIVITY_RECOGNITION)!= PackageManager.PERMISSION_GRANTED){
-            Log.d(TAG, "yeet")
-        }
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -82,10 +76,11 @@ class MainActivity : WearableActivity() {
 
     private fun setupGoogleSignInClient() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestProfile()
-                .requestEmail()
+            .requestProfile()
+            .requestEmail()
+            .requestScopes(Scope(Scopes.FITNESS_ACTIVITY_READ))
             .requestIdToken("762212303946-2bf82g29aa5hkmg11gsqrbh831ujh722.apps.googleusercontent.com")
-                .build()
+            .build()
          mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
     }
     private fun signIn() {
@@ -112,34 +107,44 @@ class MainActivity : WearableActivity() {
     }
 
     private fun getStepsFromLastWeek(){
-        Log.d(TAG, "got here")
-        val cal = Calendar.getInstance()
-        val now = Date()
-        cal.time = now
-        val endTime = cal.timeInMillis
-        cal.add(Calendar.WEEK_OF_YEAR, -1)
-        val startTime = cal.timeInMillis
+        val readRequest = queryFitnessData()
 
-        val dateFormat: DateFormat = getDateInstance()
-        Log.i(TAG, "Range Start: " + dateFormat.format(startTime))
-        Log.i(TAG, "Range End: " + dateFormat.format(endTime))
-
-        val readRequest: DataReadRequest = DataReadRequest.Builder()
-            .aggregate(
-                TYPE_CALORIES_EXPENDED,
-                AGGREGATE_CALORIES_EXPENDED
-            )
-            .bucketByActivityType(1, TimeUnit.SECONDS)
-            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-            .build()
-        val response: Task<DataReadResponse> =
-            Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this)!!)
-                .readData(readRequest)
-
-        response.addOnCompleteListener { getTaskCompleted(it) }
-
-
+        Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this)!!)
+            .readData(readRequest)
+            .addOnSuccessListener { dataReadResponse ->
+                printData(dataReadResponse)
+            }
     }
+    private fun printData(dataReadResult: DataReadResponse) {
+        // [START parse_read_data_result]
+        // If the DataReadRequest object specified aggregated data, dataReadResult will be returned
+        // as buckets containing DataSets, instead of just DataSets.
+        if (dataReadResult.buckets.isNotEmpty()) {
+            Log.i(TAG, "Number of returned buckets of DataSets is: " + dataReadResult.buckets.size)
+            for (bucket in dataReadResult.buckets) {
+                bucket.dataSets.forEach { dumpDataSet(it) }
+            }
+        } else if (dataReadResult.dataSets.isNotEmpty()) {
+            Log.i(TAG, "Number of returned DataSets is: " + dataReadResult.dataSets.size)
+            dataReadResult.dataSets.forEach { dumpDataSet(it) }
+        }
+        // [END parse_read_data_result]
+    }
+    private fun dumpDataSet(dataSet: DataSet) {
+        Log.i(TAG, "Data returned for Data type: ${dataSet.dataType.name}")
+        val dateFormat: DateFormat = getTimeInstance()
+        Log.d(TAG, "dumpDataSet: "+ dataSet.dataPoints.size)
+        for (dp in dataSet.dataPoints) {
+            Log.i(TAG, "Data point:")
+            Log.i(TAG, "\tType: ${dp.dataType.name}")
+            Log.i(TAG, "\tStart: ${dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS))}")
+            Log.i(TAG, "\tEnd: ${dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS))}")
+            dp.dataType.fields.forEach {
+                Log.i(TAG, "\tField: ${it.name} Value: ${dp.getValue(it)}")
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
@@ -166,34 +171,32 @@ class MainActivity : WearableActivity() {
         }
     }
 
-    private fun getTaskCompleted(response: Task<DataReadResponse>) {
-        val dataSets = response.result!!.dataSets
+    private fun queryFitnessData(): DataReadRequest {
+        // [START build_read_data_request]
+        // Setting a start and end date using a range of 1 week before this moment.
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val now = Date()
+        calendar.time = now
+        val endTime = calendar.timeInMillis
+        calendar.add(Calendar.WEEK_OF_YEAR, -1)
+        val startTime = calendar.timeInMillis
 
-        for (dataSet in dataSets){
-            Log.i(
-                TAG,
-                "Data returned for Data type: " + dataSet.dataType.name
-            )
-            val dateFormat: DateFormat = getTimeInstance()
+        val dateFormat: DateFormat = getDateInstance()
+        Log.i(TAG, "Range Start: ${dateFormat.format(startTime)}")
+        Log.i(TAG, "Range End: ${dateFormat.format(endTime)}")
 
-            for (dp in dataSet.dataPoints) {
-                Log.i(TAG, "Data point:")
-                Log.i(TAG, "\tType: " + dp.dataType.name)
-                Log.i(
-                    TAG,
-                    "\tStart: " + dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS))
-                )
-                Log.i(
-                    TAG,
-                    "\tEnd: " + dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS))
-                )
-                for (field in dp.dataType.fields) {
-                    Log.i(
-                        TAG,
-                        "\tField: " + field.name.toString() + " Value: " + dp.getValue(field)
-                    )
-                }
-            }
-        }
+        return DataReadRequest.Builder()
+            // The data request can specify multiple data types to return, effectively
+            // combining multiple data queries into one call.
+            // In this example, it's very unlikely that the request is for several hundred
+            // datapoints each consisting of a few steps and a timestamp.  The more likely
+            // scenario is wanting to see how many steps were walked per day, for 7 days.
+            .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+            // Analogous to a "Group By" in SQL, defines how data should be aggregated.
+            // bucketByTime allows for a time span, whereas bucketBySession would allow
+            // bucketing by "sessions", which would need to be defined in code.
+            .bucketByTime(1, TimeUnit.DAYS)
+            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+            .build()
     }
 }
