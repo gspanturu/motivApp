@@ -10,34 +10,36 @@ import androidx.wear.activity.ConfirmationActivity;
 import java.util.ArrayList;
 import java.util.Map;
 
+import at.htl.motivapp.model.Task;
+
 public class Helper {
-    public static String saveGoal(Goal goal, Context context){
+    public static String saveGoal(Task task, Context context){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         String id = String.valueOf(System.currentTimeMillis());
-        editor.putString(id, goal.getTitle());
+        editor.putString(id, task.getTitle());
 
         editor.apply();
 
         return id;
     }
 
-    public static ArrayList<Goal> getAllGoals(Context context){
+    public static ArrayList<Task> getAllGoals(Context context){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        ArrayList<Goal> goals = new ArrayList<>();
+        ArrayList<Task> tasks = new ArrayList<>();
         Map<String, ?> key = sharedPreferences.getAll();
 
         for (Map.Entry<String, ?> entry : key.entrySet()){
             String savedData = (String) entry.getValue();
 
             if (savedData != null){
-                Goal goal = new Goal(entry.getKey(), savedData);
-                goals.add(goal);
+                Task task = new Task(entry.getKey(), savedData);
+                tasks.add(task);
             }
         }
-        return goals;
+        return tasks;
     }
 
     public static void markGoalCompleted(String id, Context context){

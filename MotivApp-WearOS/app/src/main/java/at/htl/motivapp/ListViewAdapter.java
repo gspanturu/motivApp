@@ -11,10 +11,12 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-public class ListViewAdapter extends ArrayAdapter<Goal> {
+import at.htl.motivapp.model.Task;
+
+public class ListViewAdapter extends ArrayAdapter<Task> {
 
 
-    public ListViewAdapter( Context context, int resource, List<Goal> objects) {
+    public ListViewAdapter( Context context, int resource, List<Task> objects) {
         super(context, resource, objects);
     }
 
@@ -26,9 +28,9 @@ public class ListViewAdapter extends ArrayAdapter<Goal> {
         }
         convertView = LayoutInflater.from(this.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
 
-        Goal goal = getItem(position);
+        Task task = getItem(position);
         TextView title = convertView.findViewById(android.R.id.text1);
-        title.setText(goal.getTitle());
+        title.setText(task.getTitle());
 
         return convertView;
     }

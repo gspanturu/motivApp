@@ -33,4 +33,8 @@ dependencies {
     implementation 'androidx.core:core:1.2.0'
     compileOnly 'com.google.android.wearable:wearable:2.7.0'
     implementation "androidx.preference:preference:1.1.1"
+
+    //retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.8.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.8.1'
 }
