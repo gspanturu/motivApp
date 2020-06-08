@@ -16,4 +16,10 @@
             android:divider="#FFE6E8"
             android:dividerHeight="0.75dp"/>
 
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/text_view"
+            android:visibility="invisible"
+                />
 </androidx.wear.widget.BoxInsetLayout>
