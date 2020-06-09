@@ -5,7 +5,10 @@
 
     <div class="header">
       <h1>Motivapp</h1>
-      <button class="button-add" @click="addMotivation"></button>
+      <div class="add-button-container">
+        <button class="button-add" @click="addMotivation">Neue Motivation</button>
+      </div>
+      
       <div class="google">
         <div class="g-signin2" data-onsuccess="onSignIn" data-onfailure="onFailure"></div>
         <a href="#" onclick="signOut;">Sign out</a>
@@ -73,7 +76,8 @@ export default {
   background-size: 46px, 46px;
   background-repeat: no-repeat;
   height: 50px;
-  width: 50px;
+  width: 250px;
+  font-size: 20px;
 }
 .header {
   background-color: rgb(71, 225, 245);
@@ -85,7 +89,13 @@ h1 {
   text-align: left;
 }
 .google {
-  padding: 10px;
   float: right;
+  padding: 10px;
+  
+}
+.add-button-container{
+  position: absolute;
+  bottom: 0px;
+  text-align: center;
 }
 </style>

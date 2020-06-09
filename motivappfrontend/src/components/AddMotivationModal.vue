@@ -6,45 +6,11 @@
             <div class="title">Create Motivation</div>
             <div class="partition-form">
                 <input id="nameInput" type="text" placeholder="Name">
-                <input id="aimInput" type="text" placeholder="Anzahl">
+                <input id="aimInput" type="text" placeholder="Ziel">
                 <button @click="save">Speichern</button>
             </div>
             
         </div>
-        
-        
-        <!--<div class="box-part" id="bp-left">
-        <div class="partition" id="partition-register">
-            <div class="partition-title">CREATE ACCOUNT</div>
-            <div class="partition-form">
-            <form autocomplete="false">
-
-                <div class="autocomplete-fix">
-                <input disabled type="password">
-                </div>
-
-                <input id="n-email" type="text" placeholder="Email">
-                <input id="n-username" type="text" placeholder="Username">
-                <input id="n-password2" type="password" placeholder="Password">
-            </form>
-
-            <div style="margin-top: 42px">
-            </div>
-
-            <div class="button-set">
-                <button id="goto-signin-btn" @click="signIn">Sign In</button>
-                <button id="register-btn" @click="register">Register</button>
-            </div>
-
-            <button class="large-btn github-btn">connect with <span>github</span></button>
-            <button class="large-btn facebook-btn">connect with <span>facebook</span></button>
-            </div>
-        </div>
-        </div>
-        <div class="box-part" id="bp-right">
-        <div class="box-messages">
-        </div>
-        </div>-->
     </div>
     </modal>
 </template>
@@ -61,9 +27,15 @@ export default {
     },
     methods: {
         save(){
-            this.$emit('saveMotivation', document.getElementById("nameInput").value, document.getElementById("aimInput").value)
+          var name = document.getElementById("nameInput").value;
+          var aim = document.getElementById("aimInput").value;
+          if(name != "" && aim !=""){
+            this.$emit('saveMotivation', name, aim)
             this.$modal.hide('add-motivation-modal')
-            //alert(document.getElementById("nameInput").value)
+          }
+          else{
+            alert("Name und Ziel muss angegeben werden")
+          }
         }
     },
 }
