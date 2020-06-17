@@ -15,6 +15,7 @@
 
 <script>
 import Motivation from "./Motivation"
+import axios from 'axios'
 export default {
     name: "MotivationList",
     components: {
@@ -44,14 +45,48 @@ export default {
         nextId () {
             return this.motivations[this.motivations.length - 1].id + 1
         },
-        addMotivation(name, aim){
+        async addMotivation(name, aim){
+            
             var nextId = this.nextId()
-            this.motivations.push({id: nextId, name: name, aim: aim, count: 0})
+            var bodyIntention = '{ "id": ' + nextId + ', "description": "' + name + '", "googleId": "' + null + '" }'
+            try{
+                await axios.post('http://localhost:8080/intentions/add', { body: bodyIntention})
+            } catch (e) {
+                alert('insert failed: \n' + e)
+            }
+            
+            var bodyTask = ''
+            for(var i = 0; i < aim; i++){
+                bodyTask = '{ "id": ' + i + ', "intentionId": ' + nextId + ', "date": "' + Date.now() + '", "done": ' + false + ' }'
+                try{
+                    await axios.post('http://localhost:8080/tasks/add', {body: bodyTask})
+                } catch (e) {
+                    //alert('insert failed: \n' + e)
+                }
+            }
+            try{
+                this.motivations = JSON.parse(await axios.get('http://localhost:8080/intentions'))
+            } catch (e) {
+                alert('get failed: \n' + e)
+            }
+            //this.motivations.push({id: nextId, name: name, aim: aim, count: 0})
         },
-        increaseCount(item){
+        async increaseCount(item){
             item.count++;
+            try{
+                await axios.put('http://localhost:8080/tas')
+            } catch (e) {
+                alert('put failed: \n' + e)
+            }
         }
 
+    },
+    created: async function(){
+        try{
+            this.motivations = JSON.parse(await axios.get('http://localhost:8080/intentions'))
+        } catch (e){
+            alert('get failed: \n' + e)
+        }
     }
 }
 </script>

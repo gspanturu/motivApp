@@ -12,15 +12,17 @@
             
         </div>
     </div>
-    </modal>
+  </modal>
 </template>
 
 <script>
+
 const MODAL_WIDTH = 656
 export default {
     name: 'AddMotivationModal',
     data:() => ({
-        modalWidth: MODAL_WIDTH
+        modalWidth: MODAL_WIDTH,
+        posts: []
     }),
     created() {
         this.modalWidth = window.innerWidth < MODAL_WIDTH ? MODAL_WIDTH / 2 : MODAL_WIDTH
@@ -29,7 +31,9 @@ export default {
         save(){
           var name = document.getElementById("nameInput").value;
           var aim = document.getElementById("aimInput").value;
+          
           if(name != "" && aim !=""){
+            
             this.$emit('saveMotivation', name, aim)
             this.$modal.hide('add-motivation-modal')
           }
