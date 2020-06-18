@@ -4,12 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
 func startServer() {
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
+
 	api.HandleFunc("/intentions", getIntentions).Methods(http.MethodGet)
 	api.HandleFunc("/intentions/{id}", getIntentionById).Methods(http.MethodGet)
 	api.HandleFunc("/intentions/add", postIntention).Methods(http.MethodPost)
@@ -24,5 +26,5 @@ func startServer() {
 	api.HandleFunc("/tasks/delete", deleteTask).Methods(http.MethodDelete)
 
 	api.HandleFunc("", notFound)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS()(r)))
 }
